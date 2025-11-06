@@ -1,5 +1,5 @@
 # --- Practical 1: Basic Image Handling and Processing ---
-
+!pip install opencv-python numpy matplotlib
 import cv2, numpy as np, matplotlib.pyplot as plt, os
 
 # Load your image if exists, else create synthetic one
@@ -110,3 +110,4 @@ plt.show()
 # ✅ RESULT:
 # Successfully performed image loading, grayscale conversion, blurring,
 # and edge detection on both real and synthetic images using OpenCV.
+
