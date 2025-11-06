@@ -1,0 +1,379 @@
+
+---
+
+# 🧩 **PRACTICAL 1 – Basic Image Handling and Processing**
+
+### 🎯 **Aim**
+
+To perform basic image operations such as grayscale conversion, blurring, and edge detection using OpenCV.
+
+### 📘 **Theory**
+
+* **Image** = a matrix of pixel values.
+* **Color image**: 3 channels (B, G, R).
+* **Grayscale**: 1 channel (intensity only).
+* **Blurring**: Smooths the image, reduces noise using a Gaussian filter.
+* **Edge detection**: Identifies strong intensity changes using gradient operators.
+
+### 🧠 **Important Full Forms**
+
+* **BGR** – Blue, Green, Red
+* **RGB** – Red, Green, Blue
+* **Canny** – Named after John F. Canny (developer of the Canny edge detection algorithm).
+
+### 💡 **Code Meaning**
+
+* `cv2.imread()` → Loads an image (we use `np.zeros` to create one).
+* `cv2.cvtColor()` → Converts color format (BGR→GRAY).
+* `cv2.GaussianBlur()` → Applies Gaussian smoothing.
+* `cv2.Canny()` → Detects edges by thresholding gradients.
+* `plt.imshow()` → Displays the image with Matplotlib.
+
+### 🧩 **Example**
+
+A black image with a white rectangle and circle → converted to gray → blurred → edges extracted.
+
+### ❓ **Viva Q&A**
+
+* **Q:** Why convert to grayscale?
+  **A:** Many algorithms (edge/corner) depend only on intensity, not color.
+* **Q:** What does Gaussian blur do?
+  **A:** Removes high-frequency noise by averaging pixels.
+* **Q:** What are edges?
+  **A:** Boundaries between regions of different intensity.
+
+---
+
+# 🧩 **PRACTICAL 2 – Geometric Transformations**
+
+### 🎯 **Aim**
+
+To perform geometric operations like translation, rotation, reflection, and shearing.
+
+### 📘 **Theory**
+
+Geometric transformation modifies image position, size, or orientation using matrices.
+They are **Affine Transformations** (preserve straight lines and parallelism).
+
+### 📗 **Full Forms**
+
+* **ROI** – Region of Interest
+* **Affine** – Linear + Translation (no distortion)
+
+### 🧠 **Transformations**
+
+| Operation       | Meaning                      | Example           |
+| --------------- | ---------------------------- | ----------------- |
+| **Translation** | Moves image                  | Shift by (tx, ty) |
+| **Rotation**    | Rotates image around a point | 45° rotation      |
+| **Reflection**  | Mirror image                 | Horizontal flip   |
+| **Shearing**    | Slants the image             | x' = x + k·y      |
+
+### 💡 **Code Meaning**
+
+* `cv2.warpAffine()` → Applies a 2×3 affine matrix.
+* `cv2.getRotationMatrix2D()` → Returns rotation + translation matrix.
+* `np.float32([[1,0,tx],[0,1,ty]])` → Translation matrix.
+* `[-1,0,w]` → Reflect across Y-axis.
+
+### ❓ **Viva Q&A**
+
+* **Q:** What is affine transformation?
+  **A:** A linear mapping followed by translation that preserves lines and parallelism.
+* **Q:** Why use `warpAffine`?
+  **A:** It applies 2D transformation using matrix operations.
+* **Q:** Example of real use?
+  **A:** Rotating scanned documents, flipping selfies, object alignment.
+
+---
+
+# 🧩 **PRACTICAL 3 – Homography Matrix**
+
+### 🎯 **Aim**
+
+To compute and apply a homography matrix to map one image plane to another.
+
+### 📘 **Theory**
+
+* **Homography** is a 3×3 matrix used for **projective transformations**.
+* It corrects perspective distortions.
+* Requires **minimum 4 pairs** of corresponding points.
+
+### 📗 **Full Forms**
+
+* **DLT** – Direct Linear Transform (algorithm used)
+* **RANSAC** – Random Sample Consensus (for robust estimation)
+
+### 💡 **Formula**
+
+[
+s[x', y', 1]^T = H[x, y, 1]^T
+]
+where `H` is the 3×3 homography matrix.
+
+### 💡 **Code Meaning**
+
+* `cv2.findHomography(src, dst)` → Calculates H from 4+ points.
+* `cv2.warpPerspective(img, H, size)` → Applies the transformation.
+
+### 🧠 **Example**
+
+If a rectangular paper looks tilted in an image, homography can flatten it to look as if taken from above.
+
+### ❓ **Viva Q&A**
+
+* **Q:** What does homography do?
+  **A:** Maps points between two views of the same plane (used for perspective correction).
+* **Q:** How many points needed?
+  **A:** At least 4 corresponding pairs.
+* **Q:** Applications?
+  **A:** Document scanning, panorama stitching.
+
+---
+
+# 🧩 **PRACTICAL 4 – Perspective Transformation**
+
+### 🎯 **Aim**
+
+To apply a perspective transformation to correct viewing angle or perform projection.
+
+### 📘 **Theory**
+
+* Perspective transform is a **special case of homography**.
+* Straight lines remain straight, but parallel lines may converge.
+
+### 💡 **Formula**
+
+[
+x' = \frac{a_1x + b_1y + c_1}{g_1x + h_1y + 1}, \quad
+y' = \frac{a_2x + b_2y + c_2}{g_1x + h_1y + 1}
+]
+
+### 💡 **Code Meaning**
+
+* `cv2.getPerspectiveTransform(src, dst)` → Gets 3×3 perspective matrix.
+* `cv2.warpPerspective()` → Applies it to the image.
+
+### 🧠 **Example**
+
+Capturing a tilted ID card → applying perspective transform to make it rectangular.
+
+### ❓ **Viva Q&A**
+
+* **Q:** Difference between affine and perspective transform?
+  **A:** Affine preserves parallel lines; perspective doesn’t.
+* **Q:** Application?
+  **A:** Used in augmented reality, document scanners.
+
+---
+
+# 🧩 **PRACTICAL 5 – Camera Calibration**
+
+### 🎯 **Aim**
+
+To estimate camera’s internal and external parameters using known 3D–2D correspondences.
+
+### 📘 **Theory**
+
+* Relates **3D world points** → **2D image points**.
+* Determines:
+
+  * **Intrinsic parameters (K)** → focal length, principal point.
+  * **Extrinsic parameters** → rotation (R), translation (t).
+  * **Distortion coefficients** → correct lens distortion.
+
+### 📗 **Full Forms**
+
+* **RMS** – Root Mean Square (reprojection error)
+* **FOV** – Field of View
+* **Pinhole camera model** – Simple geometric model used in calibration.
+
+### 💡 **Equation**
+
+[
+s \begin{bmatrix} u \ v \ 1 \end{bmatrix} = K [R | t] \begin{bmatrix} X \ Y \ Z \ 1 \end{bmatrix}
+]
+
+### 💡 **Code Meaning**
+
+* `objp` → Known 3D coordinates (e.g., chessboard).
+* `imgp` → Corresponding 2D image points.
+* `cv2.calibrateCamera()` → Solves for K, distortion, R, t.
+
+### ❓ **Viva Q&A**
+
+* **Q:** What is intrinsic parameter?
+  **A:** Parameters internal to the camera (focal length, optical center).
+* **Q:** Why calibrate?
+  **A:** To correct distortions and perform accurate 3D measurements.
+
+---
+
+# 🧩 **PRACTICAL 6 – Fundamental Matrix**
+
+### 🎯 **Aim**
+
+To compute the fundamental matrix between two stereo images.
+
+### 📘 **Theory**
+
+* Describes **epipolar geometry** between two images.
+* Equation:
+  [
+  x'^T F x = 0
+  ]
+* `F` relates points between two images such that point x in left image corresponds to an epipolar line in right image.
+
+### 📗 **Full Forms**
+
+* **E** – Essential Matrix (calibrated version of F)
+* **F** – Fundamental Matrix
+* **FM_8POINT** – 8-point algorithm method in OpenCV
+
+### 💡 **Code Meaning**
+
+* `cv2.findFundamentalMat(pts1, pts2, method)` → computes F.
+* `FM_8POINT` → classic algorithm using 8 correspondences.
+
+### ❓ **Viva Q&A**
+
+* **Q:** What does F represent?
+  **A:** It encodes the relation between two views of the same scene.
+* **Q:** What is the difference between F and E?
+  **A:** F works for uncalibrated cameras; E is for calibrated ones.
+* **Q:** Use?
+  **A:** Used in stereo vision and 3D reconstruction.
+
+---
+
+# 🧩 **PRACTICAL 7 – Edge, Line, and Corner Detection**
+
+### 🎯 **Aim**
+
+To detect edges, lines, and corners using different algorithms.
+
+### 📘 **Theory**
+
+* **Edges:** Sudden intensity changes. Detected by **Canny**.
+* **Lines:** Detected using **Hough Transform** (maps points to sinusoids).
+* **Corners:** Detected using **Harris** method (variation in both x and y).
+
+### 📗 **Full Forms**
+
+* **HOG** – Histogram of Oriented Gradients
+* **ROI** – Region of Interest
+* **Canny** – Edge detector algorithm by John Canny
+
+### 💡 **Code Meaning**
+
+* `cv2.Canny()` → Detects edges.
+* `cv2.HoughLinesP()` → Finds straight lines.
+* `cv2.cornerHarris()` → Finds corners by analyzing intensity variations.
+
+### 🧠 **Example**
+
+Image with rectangles and diagonals → edges (boundaries), lines (green), corners (red dots).
+
+### ❓ **Viva Q&A**
+
+* **Q:** What is a corner?
+  **A:** A point with high change in intensity in both directions.
+* **Q:** How is Hough Transform used?
+  **A:** Detects straight lines by converting to polar coordinates.
+
+---
+
+# 🧩 **PRACTICAL 8 – SIFT Feature Descriptor**
+
+### 🎯 **Aim**
+
+To detect and describe keypoints that are scale and rotation invariant.
+
+### 📘 **Theory**
+
+* **SIFT (Scale-Invariant Feature Transform)** detects points that remain the same under scaling, rotation, and lighting changes.
+* Descriptors are **128-dimensional** feature vectors.
+
+### 📗 **Full Forms**
+
+* **DOG** – Difference of Gaussian
+* **SIFT** – Scale-Invariant Feature Transform
+
+### 💡 **Main Steps**
+
+1. Scale-space extrema detection
+2. Keypoint localization
+3. Orientation assignment
+4. Descriptor computation (gradient histograms)
+
+### 💡 **Code Meaning**
+
+* `cv2.SIFT_create()` → Creates SIFT object.
+* `detectAndCompute()` → Finds keypoints and their descriptors.
+* `drawKeypoints()` → Visualizes keypoints.
+
+### ❓ **Viva Q&A**
+
+* **Q:** Why SIFT is invariant?
+  **A:** Because it normalizes for scale, rotation, and brightness.
+* **Q:** Application?
+  **A:** Image matching, object recognition, panorama stitching.
+
+---
+
+# 🧩 **PRACTICAL 9 – SURF and HOG**
+
+### 🎯 **Aim**
+
+To implement SURF (fast robust features) and HOG (gradient-based descriptor).
+
+### 📘 **Theory**
+
+* **SURF (Speeded-Up Robust Features)**: Faster version of SIFT using **Hessian matrix** and **box filters**.
+* **HOG (Histogram of Oriented Gradients)**: Describes object shape using local edge directions.
+
+### 📗 **Full Forms**
+
+* **SURF** – Speeded-Up Robust Features
+* **HOG** – Histogram of Oriented Gradients
+* **ROI** – Region of Interest
+
+### 💡 **Code Meaning**
+
+* `cv2.xfeatures2d.SURF_create(400)` → Creates SURF detector.
+* `detectAndCompute()` → Gets feature keypoints and descriptors.
+* `cv2.HOGDescriptor()` → Computes HOG feature vector for an image.
+
+### 🧠 **Applications**
+
+| Method   | Used For                             |
+| -------- | ------------------------------------ |
+| **SURF** | Object recognition, feature matching |
+| **HOG**  | Human/vehicle detection              |
+
+### ❓ **Viva Q&A**
+
+* **Q:** Difference between SIFT and SURF?
+  **A:** SURF is faster, uses integral images.
+* **Q:** What does HOG capture?
+  **A:** The distribution of edge orientations (shape info).
+* **Q:** Why use descriptors?
+  **A:** They convert image patches into numerical features for matching.
+
+---
+
+# 💯 **FINAL VIVA QUICK REVISION TABLE**
+
+| Practical | Topic              | Key Concept                  | Real-Life Use          |
+| --------- | ------------------ | ---------------------------- | ---------------------- |
+| 1         | Image Basics       | Grayscale, blur, edge        | Preprocessing          |
+| 2         | Geometric          | Rotate, translate, reflect   | Image alignment        |
+| 3         | Homography         | Plane-to-plane mapping       | Perspective correction |
+| 4         | Perspective        | Rectify viewpoint            | Document scanning      |
+| 5         | Calibration        | Camera intrinsics/extrinsics | 3D measurement         |
+| 6         | Fundamental Matrix | Epipolar geometry            | Stereo vision          |
+| 7         | Edge/Line/Corner   | Feature extraction           | Shape detection        |
+| 8         | SIFT               | Scale-invariant features     | Image matching         |
+| 9         | SURF & HOG         | Robust/gradient descriptors  | Object detection       |
+
+---
